@@ -1,3 +1,5 @@
+using BankBranches.Domain.Common;
+using BankBranches.Domain.Entities;
 using BankBranches.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +22,23 @@ public class RegionsController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route(nameof(GetAllRegionsAsync))]
-    public async Task<string> GetAllRegionsAsync() => await _regionExternalService.GetAllRegionsAsync();
+    public async Task<RequestResult<IEnumerable<Region>>> GetAllRegionsAsync()
+    {
+        IEnumerable<Region> regions = await _regionExternalService.GetAllRegionsAsync();
+        return RequestResult<IEnumerable<Region>>.Success(regions);
+    }
 
     /// <summary>
     /// Consultar el detalle de una región específica por su ID único.
     /// </summary>
     [HttpGet]
     [Route(nameof(GetRegionByIdAsync))]
-    public async Task<string> GetRegionByIdAsync([FromQuery] int regionId) => await _regionExternalService.GetRegionByIdAsync(regionId);
+    public async Task<RequestResult<Region>> GetRegionByIdAsync([FromQuery] int regionId)
+    {
+        Region? region = await _regionExternalService.GetRegionByIdAsync(regionId);
+        if (region is null)
+            return RequestResult<Region>.NotFound($"No se encontró la región con Id {regionId} en el servicio externo.");
+
+        return RequestResult<Region>.Success(region);
+    }
 }

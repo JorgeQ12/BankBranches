@@ -49,6 +49,14 @@ public static class DependencyInjection
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
                 RoleClaimType = System.Security.Claims.ClaimTypes.Role
             };
+            options.Events = new JwtBearerEvents
+            {
+                OnForbidden = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                }
+            };
         });
 
         // External API - Colombia

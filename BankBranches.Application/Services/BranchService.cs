@@ -8,10 +8,12 @@ namespace BankBranches.Application.Services;
 public class BranchService : IBranchService
 {
     private readonly IBranchRepository _branchRepository;
+    private readonly IRegionExternalService _regionService;
 
-    public BranchService(IBranchRepository branchRepository)
+    public BranchService(IBranchRepository branchRepository, IRegionExternalService regionService)
     {
         _branchRepository = branchRepository;
+        _regionService = regionService;
     }
 
     /// <summary>
@@ -20,7 +22,15 @@ public class BranchService : IBranchService
     public async Task<RequestResult<IEnumerable<BranchDto>>> GetAllBranchesAsync()
     {
         IEnumerable<Branch> branches = await _branchRepository.GetAllBranchesAsync();
-        IEnumerable<BranchDto> branchDtos = branches.Select(MapToBranchDto);
+        IEnumerable<Region> regions = await _regionService.GetAllRegionsAsync();
+
+        IEnumerable<BranchDto> branchDtos = branches.Select(b => 
+        {
+            BranchDto dto = MapToBranchDto(b);
+            dto.RegionName = regions.FirstOrDefault(r => r.Id == b.RegionId)?.Name ?? "Desconocida";
+            return dto;
+        });
+
         return RequestResult<IEnumerable<BranchDto>>.Success(branchDtos);
     }
 
@@ -33,7 +43,11 @@ public class BranchService : IBranchService
         if (branch is null)
             return RequestResult<BranchDto>.NotFound($"No se encontró la sucursal con Id {branchId}.");
 
-        return RequestResult<BranchDto>.Success(MapToBranchDto(branch));
+        Region? region = await _regionService.GetRegionByIdAsync(branch.RegionId);
+        BranchDto dto = MapToBranchDto(branch);
+        dto.RegionName = region?.Name ?? "Desconocida";
+
+        return RequestResult<BranchDto>.Success(dto);
     }
 
     /// <summary>
@@ -42,7 +56,18 @@ public class BranchService : IBranchService
     public async Task<RequestResult<IEnumerable<BranchDto>>> GetBranchesByRegionIdAsync(int regionId)
     {
         IEnumerable<Branch> branches = await _branchRepository.GetBranchesByRegionIdAsync(regionId);
-        IEnumerable<BranchDto> branchDtos = branches.Select(MapToBranchDto);
+        if (branches.Count() == 0)
+            return RequestResult<IEnumerable<BranchDto>>.NotFound($"No se encontró sucursales.");
+
+        Region? region = await _regionService.GetRegionByIdAsync(regionId);
+        
+        IEnumerable<BranchDto> branchDtos = branches.Select(b => 
+        {
+            BranchDto dto = MapToBranchDto(b);
+            dto.RegionName = region?.Name ?? "Desconocida";
+            return dto;
+        });
+
         return RequestResult<IEnumerable<BranchDto>>.Success(branchDtos);
     }
 
@@ -52,7 +77,17 @@ public class BranchService : IBranchService
     public async Task<RequestResult<IEnumerable<BranchDto>>> GetBranchesByCityIdAsync(int cityId)
     {
         IEnumerable<Branch> branches = await _branchRepository.GetBranchesByCityIdAsync(cityId);
-        IEnumerable<BranchDto> branchDtos = branches.Select(MapToBranchDto);
+        if (branches.Count() == 0)
+            return RequestResult<IEnumerable<BranchDto>>.NotFound($"No se encontró sucursales.");
+        IEnumerable<Region> regions = await _regionService.GetAllRegionsAsync();
+
+        IEnumerable<BranchDto> branchDtos = branches.Select(b => 
+        {
+            BranchDto dto = MapToBranchDto(b);
+            dto.RegionName = regions.FirstOrDefault(r => r.Id == b.RegionId)?.Name ?? "Desconocida";
+            return dto;
+        });
+
         return RequestResult<IEnumerable<BranchDto>>.Success(branchDtos);
     }
 
@@ -108,6 +143,6 @@ public class BranchService : IBranchService
         CityId = branch.CityId,
         CityName = branch.CityName ?? default!,
         RegionId = branch.RegionId,
-        RegionName = branch.RegionName ?? default!,
+        RegionName = branch.RegionName ?? "Cargando..."
     };
 }

@@ -33,7 +33,7 @@ BEGIN
 END
 GO
 
--- Tabla: Cities (Ciudades - referencia a regiones de API Colombia)
+-- Tabla: Cities (Ciudades)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Cities')
 BEGIN
     CREATE TABLE Cities (
@@ -45,7 +45,7 @@ BEGIN
 END
 GO
 
--- Tabla: Branches (Sucursales - CRUD principal)
+-- Tabla: Branches (Sucursales)
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Branches')
 BEGIN
     CREATE TABLE Branches (
@@ -105,7 +105,6 @@ CREATE PROCEDURE sp_CreateUser
     @IsActive     BIT
 AS
 BEGIN
-    SET NOCOUNT ON;
     INSERT INTO Users (FullName, Email, PasswordHash, Role, CreatedAt, IsActive)
     VALUES (@FullName, @Email, @PasswordHash, @Role, @CreatedAt, @IsActive);
 
@@ -275,7 +274,6 @@ CREATE PROCEDURE sp_CreateBranch
     @CreatedAt  DATETIME2
 AS
 BEGIN
-    SET NOCOUNT ON;
     INSERT INTO Branches (Name, Address, Phone, CityId, RegionId, IsActive, CreatedAt)
     VALUES (@Name, @Address, @Phone, @CityId, @RegionId, @IsActive, @CreatedAt);
 
@@ -295,7 +293,6 @@ CREATE PROCEDURE sp_UpdateBranch
     @RegionId   INT
 AS
 BEGIN
-    SET NOCOUNT ON;
     UPDATE Branches
     SET Name = @Name,
         Address = @Address,
@@ -306,14 +303,13 @@ BEGIN
 END
 GO
 
--- SP: Eliminar sucursal (Soft Delete)
+-- SP: Eliminar sucursal
 IF OBJECT_ID('sp_DeleteBranch', 'P') IS NOT NULL DROP PROCEDURE sp_DeleteBranch;
 GO
 CREATE PROCEDURE sp_DeleteBranch
     @Id INT
 AS
 BEGIN
-    SET NOCOUNT ON;
     UPDATE Branches
     SET IsActive = 0
     WHERE Id = @Id AND IsActive = 1;
@@ -374,12 +370,12 @@ GO
 -- =====================================================
 -- 7. DATOS SEMILLA - Usuario Admin
 -- =====================================================
--- Password: Admin123! (hash BCrypt pre-generado)
+-- Password: Admin123!
 IF NOT EXISTS (SELECT 1 FROM Users WHERE Email = 'admin@bankbranches.com')
 BEGIN
     INSERT INTO Users (FullName, Email, PasswordHash, Role, CreatedAt, IsActive)
     VALUES ('Administrador', 'admin@bankbranches.com',
-            '$2a$11$K5Io9kkXE7Hx3q7eKYkHFuMz1Gp6f5QXHxqK8V.jN5V4J7m5a0dHe',
+            '$2a$12$a/BylWgxoBItS52kHfNZ.ejBMnsr9EVASXKFHugsQOEvSqxt0rtJW',
             'Admin', GETUTCDATE(), 1);
 END
 GO

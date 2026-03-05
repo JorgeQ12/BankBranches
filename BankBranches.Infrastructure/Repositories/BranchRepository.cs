@@ -37,7 +37,7 @@ public class BranchRepository : IBranchRepository
     /// </summary>
     public async Task<bool> CreateBranchAsync(Branch branch)
     {
-        int rowsAffected = await _genericRepository.ExecuteProcedureAsync("sp_CreateBranch", new
+        int createdId = await _genericRepository.ExecuteScalarProcedureAsync<int>("sp_CreateBranch", new
         {
             branch.Name,
             branch.Address,
@@ -47,7 +47,7 @@ public class BranchRepository : IBranchRepository
             branch.IsActive,
             branch.CreatedAt
         });
-        return rowsAffected > 0;
+        return createdId > 0;
     }
 
     /// <summary>

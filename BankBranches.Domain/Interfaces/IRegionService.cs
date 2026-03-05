@@ -1,3 +1,5 @@
+using BankBranches.Domain.Entities;
+
 namespace BankBranches.Domain.Interfaces;
 
 public interface IRegionExternalService
@@ -5,10 +7,10 @@ public interface IRegionExternalService
     /// <summary>
     /// Obtener el listado completo de regiones desde el servicio externo.
     /// </summary>
-    Task<string> GetAllRegionsAsync();
+    Task<IEnumerable<Region>> GetAllRegionsAsync();
 
     /// <summary>
-    /// Obtener el detalle de una región específica consultando el servicio externo por su Id.
+    /// Obtener el detalle de una región específica por su Id.
     /// </summary>
-    Task<string> GetRegionByIdAsync(int regionId);
+    Task<Region?> GetRegionByIdAsync(int regionId);
 }

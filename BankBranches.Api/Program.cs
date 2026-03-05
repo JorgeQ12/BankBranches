@@ -1,12 +1,12 @@
 using System.Reflection;
 using BankBranches.Api.Middleware;
-using BankBranches.Infrastructure;
-using BankBranches.Application;
+using BankBranches.Infrastructure.Extensions;
+using BankBranches.Application.Extensions;
 using Microsoft.OpenApi.Models;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// ── Services ──────────────────────────────────────────────
+// Services
 builder.Services.AddControllers();
 
 // Swagger + JWT Authorize button + XML Docs
@@ -17,10 +17,10 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "BankBranches API",
         Version = "v1",
-        Description = "API REST para gestión de sucursales bancarias — Clean Architecture, .NET 8, Dapper, JWT"
+        Description = "API REST para gestión de sucursales bancarias"
     });
 
-    // Incluir documentación XML de los summary
+    // Documentacion
     string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
@@ -50,7 +50,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Infrastructure (Repos, JWT, HttpClient) & Application Services
+// Infrastructure
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
@@ -67,7 +67,7 @@ builder.Services.AddCors(options =>
 
 WebApplication app = builder.Build();
 
-// ── Middleware Pipeline ───────────────────────────────────
+// Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
