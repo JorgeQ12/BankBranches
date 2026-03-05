@@ -70,7 +70,7 @@ WebApplication app = builder.Build();
 // Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("EnableSwagger"))
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
