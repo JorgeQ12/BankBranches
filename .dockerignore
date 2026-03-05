@@ -1,0 +1,12 @@
+**/*.dockerfile
+**/*.Dockerfile
+**/obj/
+**/bin/
+.git/
+.vs/
+.vscode/
+**/Debug/
+**/Release/
+*.user
+*.suo
+*.sln.dotSettings.user
